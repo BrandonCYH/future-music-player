@@ -4,12 +4,11 @@ let accessToken = null;
 
 // Spotify API endpoints
 const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
-const PROFILE_URL = 'https://api.spotify.com/v1/me';
-const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
+const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
-    const scope = 'user-read-playback-state user-modify-playback-state';
+    const scope = 'user-read-recently-played';
     const authURL = `${AUTHORIZE_URL}?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(
         REDIRECT_URI
     )}&scope=${encodeURIComponent(scope)}`;
@@ -24,35 +23,36 @@ function extractAccessToken() {
         const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
         accessToken = params.get('access_token');
         if (accessToken) {
-            alert('Authentication successful! You can now play songs.');
+            fetchRecentlyPlayedTracks();
         } else {
             console.error('Access token not found. Please authenticate.');
         }
     }
 }
 
-// Step 3: Play a Specific Track on Spotify
-async function playTrack(uri) {
+// Step 3: Fetch Recently Played Tracks
+async function fetchRecentlyPlayedTracks() {
     try {
-        const response = await axios.put(
-            PLAY_URL,
-            { uris: [uri] }, // Track URI
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-        console.log('Playing track:', uri);
-        alert('Now playing: Shania Yan - Sick of You');
+        const response = await axios.get(RECENTLY_PLAYED_URL, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            params: { limit: 5 }, // Fetch only the latest 5 tracks
+        });
+
+        const tracks = response.data.items;
+
+        // Display the tracks
+        const trackList = tracks.map((item, index) => {
+            const track = item.track;
+            return `${index + 1}. ${track.name} by ${track.artists
+                .map((artist) => artist.name)
+                .join(', ')}`;
+        });
+
+        alert(`Your Last 5 Tracks:\n${trackList.join('\n')}`);
+        console.log('Recently Played Tracks:', trackList);
     } catch (error) {
-        console.error('Error playing track:', error);
-        if (error.response?.status === 403) {
-            alert('Ensure a Spotify device is active for playback.');
-        } else {
-            alert('Failed to play the track. Please try again.');
-        }
+        console.error('Error fetching recently played tracks:', error);
+        alert('Failed to fetch recently played tracks. Please try again.');
     }
 }
 
@@ -65,10 +65,7 @@ function initializeApp() {
 
 // Event Listeners
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
-document.getElementById('playPauseBtn').addEventListener('click', () => {
-    const trackUri = 'spotify:track:0V5nFZrkCFLz0zJSNOOdJl'; // Shania Yan - Sick of You
-    playTrack(trackUri);
-});
+document.getElementById('fetchTracksBtn').addEventListener('click', fetchRecentlyPlayedTracks);
 
 // Call the initialize function when the page loads
 initializeApp();
