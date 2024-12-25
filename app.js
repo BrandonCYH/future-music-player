@@ -76,7 +76,7 @@ async function playTrack(trackUri) {
             console.log('Playing track:', trackUri);
             // Play the first track from the playlist
             const firstTrackUri = trackUri.items[0].track.uri;
-            console.log(firstTrackUri);
+            playTrack(firstTrackUri);
         } else {
             console.error('Error playing track:', response.status, response.statusText);
         }
