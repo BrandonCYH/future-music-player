@@ -66,7 +66,7 @@ function initializeSpotifyPlayer() {
 // Step 4: Play a song
 function playSong() {
     // Replace this track URI with any valid Spotify track URI
-    const trackUri = 'spotify:track:73bExgLbebZU8nmW9uDuJV'; // Example track
+    const trackUri = 'https://open.spotify.com/track/73bExgLbebZU8nmW9uDuJV'; // Example track
 
     player.play({
         uris: [trackUri]
