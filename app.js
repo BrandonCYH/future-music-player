@@ -7,6 +7,28 @@ const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
 const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
 
+window.onSpotifyWebPlaybackSDKReady = () => {
+    const player = new Spotify.Player({
+        name: 'Web Playback SDK Quick Start Player',
+        getOAuthToken: (cb) => { cb(accessToken); }, // Use your access token here
+        volume: 0.5,
+    });
+
+    // Error handling
+    player.addListener('initialization_error', ({ message }) => { console.error(message); });
+    player.addListener('authentication_error', ({ message }) => { console.error(message); });
+    player.addListener('account_error', ({ message }) => { console.error(message); });
+    player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+    // Playback status
+    player.addListener('player_state_changed', state => { console.log(state); });
+    player.addListener('ready', ({ device_id }) => { console.log('The player is ready with device ID', device_id); });
+    player.addListener('not_ready', ({ device_id }) => { console.log('The player has gone offline', device_id); });
+
+    // Connect the player
+    player.connect();
+};
+
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
     const scope = 'user-read-recently-played user-modify-playback-state user-read-playback-state';
@@ -83,7 +105,7 @@ function initializeApp() {
 
 // Event Listeners
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
-document.getElementById('playTracksBtn').addEventListener('click', fetchAndPlayRecentlyPlayedTracks);
+// document.getElementById('playTracksBtn').addEventListener('click', fetchAndPlayRecentlyPlayedTracks);
 
 // Call the initialize function when the page loads
 initializeApp();
