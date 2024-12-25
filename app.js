@@ -6,6 +6,31 @@ let accessToken = null;
 const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
 const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
+const DEVICES_URL = 'https://api.spotify.com/v1/me/player/devices';
+
+// Fetch available devices
+async function checkAvailableDevices() {
+  try {
+    const response = await axios.get(DEVICES_URL, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const devices = response.data.devices;
+
+    if (devices.length === 0) {
+      alert('No active Spotify devices found. Please open Spotify and start playback on a device.');
+      console.error('No active devices:', devices);
+      return null;
+    }
+
+    console.log('Available devices:', devices);
+    return devices[0].id; // Use the first active device
+  } catch (error) {
+    console.error('Error checking devices:', error);
+    alert('Failed to fetch devices. Please try again.');
+    return null;
+  }
+}
+
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
