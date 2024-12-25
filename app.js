@@ -5,7 +5,6 @@ let accessToken = null;
 // Spotify API endpoints
 const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
-const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
@@ -44,9 +43,6 @@ async function fetchAndPlayRecentlyPlayedTracks() {
         const trackUris = tracks.map((item) => item.track.uri); // Extract track URIs
 
         console.log('Recently Played Tracks URIs:', trackUris);
-
-        // Play Tracks
-        await playTracks(trackUris);
     } catch (error) {
         console.error('Error fetching recently played tracks:', error);
         alert('Failed to fetch or play recently played tracks. Please try again.');
