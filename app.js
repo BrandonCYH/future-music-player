@@ -5,6 +5,8 @@ let accessToken = null;
 // Spotify API endpoints
 const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
+// Spotify Web API Play URL
+const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
@@ -65,14 +67,19 @@ async function playTrack(trackUri) {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ uris: [trackUri] }),
+            body: JSON.stringify({
+                uris: [trackUri],  // Use the track URI to play it
+            }),
         });
 
-        if (!response.ok) {
-            throw new Error('Error playing track');
+        if (response.ok) {
+            console.log('Playing track:', trackUri);
+            // Play the first track from the playlist
+            const firstTrackUri = trackUri.items[0].track.uri;
+            console.log(firstTrackUri);
+        } else {
+            console.error('Error playing track:', response.status, response.statusText);
         }
-
-        console.log('Playing track:', trackUri);
     } catch (error) {
         console.error('Error playing track:', error);
     }
@@ -90,7 +97,7 @@ function initializeApp() {
 
 // Event Listeners
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
-document.getElementById('playTracksBtn').addEventListener('click', fetchAndPlayRecentlyPlayedTracks);
+document.getElementById('playTracksBtn').addEventListener('click', fetchRecentlyPlayedTracks);
 
 // Call the initialize function when the page loads
 initializeApp();
