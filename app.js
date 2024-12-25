@@ -65,7 +65,6 @@ function initializeApp() {
 
 // Event Listeners
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
-document.getElementById('fetchTracksBtn').addEventListener('click', fetchRecentlyPlayedTracks);
 
 // Call the initialize function when the page loads
 initializeApp();
