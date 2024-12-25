@@ -5,10 +5,11 @@ let accessToken = null;
 // Spotify API endpoints
 const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
+const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
-    const scope = 'user-read-recently-played';
+    const scope = 'user-read-recently-played user-modify-playback-state user-read-playback-state';
     const authURL = `${AUTHORIZE_URL}?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(
         REDIRECT_URI
     )}&scope=${encodeURIComponent(scope)}`;
@@ -23,36 +24,53 @@ function extractAccessToken() {
         const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
         accessToken = params.get('access_token');
         if (accessToken) {
-            fetchRecentlyPlayedTracks();
+            fetchAndPlayRecentlyPlayedTracks();
         } else {
             console.error('Access token not found. Please authenticate.');
         }
     }
 }
 
-// Step 3: Fetch Recently Played Tracks
-async function fetchRecentlyPlayedTracks() {
+// Step 3: Fetch and Play Recently Played Tracks
+async function fetchAndPlayRecentlyPlayedTracks() {
     try {
+        // Fetch Recently Played Tracks
         const response = await axios.get(RECENTLY_PLAYED_URL, {
             headers: { Authorization: `Bearer ${accessToken}` },
             params: { limit: 5 }, // Fetch only the latest 5 tracks
         });
 
         const tracks = response.data.items;
+        const trackUris = tracks.map((item) => item.track.uri); // Extract track URIs
 
-        // Display the tracks
-        const trackList = tracks.map((item, index) => {
-            const track = item.track;
-            return `${index + 1}. ${track.name} by ${track.artists
-                .map((artist) => artist.name)
-                .join(', ')}`;
-        });
+        console.log('Recently Played Tracks URIs:', trackUris);
 
-        alert(`Your Last 5 Tracks:\n${trackList.join('\n')}`);
-        console.log('Recently Played Tracks:', trackList);
+        // Play Tracks
+        await playTracks(trackUris);
     } catch (error) {
         console.error('Error fetching recently played tracks:', error);
-        alert('Failed to fetch recently played tracks. Please try again.');
+        alert('Failed to fetch or play recently played tracks. Please try again.');
+    }
+}
+
+// Step 4: Play Tracks on Spotify
+async function playTracks(uris) {
+    try {
+        await axios.put(
+            PLAY_URL,
+            { uris }, // Pass the array of track URIs
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        alert('Playing your last 5 tracks!');
+        console.log('Playing tracks:', uris);
+    } catch (error) {
+        console.error('Error playing tracks:', error);
+        alert('Ensure a Spotify device is active for playback.');
     }
 }
 
@@ -65,6 +83,7 @@ function initializeApp() {
 
 // Event Listeners
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
+document.getElementById('playTracksBtn').addEventListener('click', fetchAndPlayRecentlyPlayedTracks);
 
 // Call the initialize function when the page loads
 initializeApp();
