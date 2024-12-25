@@ -81,5 +81,7 @@ function initializeApp() {
     }
 }
 
+document.getElementById('playTracksBtn').addEventListener('click', fetchAndPlayRecentlyPlayedTracks);
+
 // Call the initialize function when the page loads
 initializeApp();
