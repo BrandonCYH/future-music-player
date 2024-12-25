@@ -31,6 +31,7 @@ async function checkAvailableDevices() {
   }
 }
 
+checkAvailableDevices();
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
