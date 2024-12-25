@@ -1,147 +1,90 @@
 const CLIENT_ID = 'a76798888aba4544866c66b27a161138'; // Replace with your Spotify Client ID
 const REDIRECT_URI = 'https://brandoncyh.github.io/future-music-player/music_player'; // Replace with your redirect URI
 let accessToken = null;
+let player = null;
 
-// Spotify API endpoints
-const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
-const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
-const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
-const DEVICES_URL = 'https://api.spotify.com/v1/me/player/devices';
+const scope = 'user-read-private user-read-email streaming'; // Add 'streaming' scope for Web Playback
 
-// Fetch available devices
-async function checkAvailableDevices() {
-  try {
-    const response = await axios.get(DEVICES_URL, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const devices = response.data.devices;
-
-    if (devices.length === 0) {
-      alert('No active Spotify devices found. Please open Spotify and start playback on a device.');
-      console.error('No active devices:', devices);
-      return null;
-    }
-
-    console.log('Available devices:', devices);
-    return devices[0].id; // Use the first active device
-  } catch (error) {
-    console.error('Error checking devices:', error);
-    alert('Failed to fetch devices. Please try again.');
-    return null;
-  }
-}
-
-checkAvailableDevices();
-
-// Step 1: Handle OAuth Authentication
+// Step 1: Authenticate with Spotify
 function authenticateSpotify() {
-  const scope = 'user-read-playback-state user-modify-playback-state';
-    // const scope = 'user-read-recently-played user-modify-playback-state user-read-playback-state';
-    const authURL = `${AUTHORIZE_URL}?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(
+    const authURL = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(
         REDIRECT_URI
     )}&scope=${encodeURIComponent(scope)}`;
 
     window.location.href = authURL;
 }
 
-// Step 2: Extract the Access Token from URL (after redirect)
+// Step 2: Extract access token from URL
 function extractAccessToken() {
     const hash = window.location.hash;
     if (hash) {
-        const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
+        const params = new URLSearchParams(hash.substring(1));
         accessToken = params.get('access_token');
         if (accessToken) {
-            fetchAndPlayRecentlyPlayedTracks();
+            initializeSpotifyPlayer(); // Initialize the player if access token is found
         } else {
             console.error('Access token not found. Please authenticate.');
         }
     }
 }
 
-// Step 3: Fetch and Play Recently Played Tracks
-async function fetchAndPlayRecentlyPlayedTracks() {
-  try {
-    // Fetch Recently Played Tracks
-    const response = await axios.get(RECENTLY_PLAYED_URL, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      params: { limit: 5 }, // Fetch only the latest 5 tracks
-    });
+// Step 3: Initialize Spotify Player
+function initializeSpotifyPlayer() {
+    if (accessToken) {
+        // Initialize the Web Playback SDK
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            player = new Spotify.Player({
+                name: 'Web Playback SDK Example',
+                getOAuthToken: (cb) => { cb(accessToken); },
+                volume: 0.5
+            });
 
-    const tracks = response.data.items;
-    const trackUris = tracks.map((item) => item.track.uri); // Extract track URIs
+            // Error handling
+            player.addListener('initialization_error', ({ message }) => { console.error(message); });
+            player.addListener('authentication_error', ({ message }) => { console.error(message); });
+            player.addListener('account_error', ({ message }) => { console.error(message); });
+            player.addListener('playback_error', ({ message }) => { console.error(message); });
 
-    console.log('Recently Played Tracks URIs:', trackUris);
+            // Playback state updates
+            player.addListener('player_state_changed', (state) => {
+                console.log(state);
+            });
 
-    // Play Tracks
-    await playTracks(trackUris);
-  } catch (error) {
-    console.error('Error fetching recently played tracks:', error);
-    alert('Failed to fetch or play recently played tracks. Please try again.');
-  }
-}
+            // Ready to play
+            player.addListener('ready', ({ device_id }) => {
+                console.log('Player is ready with device ID', device_id);
+                // Play a song here after initializing
+                playSong();
+            });
 
-// Step 4: Play Tracks on Spotify
-async function playTracksOnDevice(uris, deviceId) {
-  try {
-    await axios.put(
-      `${PLAY_URL}?device_id=${deviceId}`,
-      { uris }, // Array of track URIs to play
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    console.log('Playing tracks on device:', deviceId);
-    alert('Tracks are now playing!');
-  } catch (error) {
-    console.error('Error playing tracks:', error);
-    alert('Failed to play tracks. Ensure the device is active.');
-  }
-}
-
-async function getDeviceAndPlayTracks(uris) {
-  try {
-    const response = await axios.get(DEVICES_URL, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const devices = response.data.devices;
-
-    if (devices.length === 0) {
-      alert('No active Spotify devices found. Please activate a device.');
-      return;
+            // Connect to the player
+            player.connect();
+        };
     }
-
-    // Find the Spotify Web Player device (or use the first available device)
-    const webPlayer = devices.find((device) => device.type === 'Computer');
-    const selectedDeviceId = webPlayer ? webPlayer.id : devices[0].id;
-
-    console.log('Using device:', selectedDeviceId);
-    playTracksOnDevice(uris, selectedDeviceId);
-  } catch (error) {
-    console.error('Error fetching devices or playing tracks:', error);
-    alert('Failed to get devices or play tracks.');
-  }
 }
 
-// Example usage
-const trackUris = [
-  'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp', // Replace with your extracted URIs
-  'spotify:track:4uLU6hMCjMI75M1A2tKUQC',
-];
-getDeviceAndPlayTracks(trackUris);
+// Step 4: Play a song
+function playSong() {
+    // Replace this track URI with any valid Spotify track URI
+    const trackUri = 'spotify:track:73bExgLbebZU8nmW9uDuJV'; // Example track
 
+    player.play({
+        uris: [trackUri]
+    }).then(() => {
+        console.log('Now playing the track');
+    }).catch(error => {
+        console.error('Error playing the track', error);
+    });
+}
 
-// Initialize App
+// Step 5: Initialize the app
 function initializeApp() {
-    if (!accessToken) {
-        extractAccessToken();
-    }
+    extractAccessToken();
 }
 
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
-document.getElementById('playTracksBtn').addEventListener('click', fetchAndPlayRecentlyPlayedTracks);
-
-// Call the initialize function when the page loads
-initializeApp();
+document.getElementById('playPauseBtn').addEventListener('click', () => {
+    player.togglePlay().then(() => {
+        console.log('Playback toggled');
+    });
+});
