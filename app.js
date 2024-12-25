@@ -83,8 +83,3 @@ function initializeApp() {
 }
 
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
-document.getElementById('playPauseBtn').addEventListener('click', () => {
-    player.togglePlay().then(() => {
-        console.log('Playback toggled');
-    });
-});
