@@ -6,10 +6,39 @@ let accessToken = null;
 const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played';
 const PLAY_URL = 'https://api.spotify.com/v1/me/player/play';
+const DEVICES_URL = 'https://api.spotify.com/v1/me/player/devices';
+
+// Fetch available devices
+async function checkAvailableDevices() {
+    try {
+        const response = await axios.get(DEVICES_URL, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const devices = response.data.devices;
+        console.log(devices);
+
+        if (devices.length === 0) {
+            alert('No active Spotify devices found. Please open Spotify and start playback on a device.');
+            console.error('No active devices:', devices);
+            return null;
+        }
+
+        console.log('Available devices:', devices);
+        return devices[0].id; // Use the first active device
+    } catch (error) {
+        console.error('Error checking devices:', error);
+        alert('Failed to fetch devices. Please try again.');
+        return null;
+    }
+}
+
+// Call this function to list available devices
+checkAvailableDevices();
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
-    const scope = 'user-read-recently-played user-modify-playback-state user-read-playback-state';
+    const scope = 'user-read-playback-state user-modify-playback-state';
+    // const scope = 'user-read-recently-played user-modify-playback-state user-read-playback-state';
     const authURL = `${AUTHORIZE_URL}?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(
         REDIRECT_URI
     )}&scope=${encodeURIComponent(scope)}`;
@@ -54,11 +83,12 @@ async function fetchAndPlayRecentlyPlayedTracks() {
 }
 
 // Step 4: Play Tracks on Spotify
-async function playTracks(uris) {
+async function playTracksOnDevice(uris, deviceId) {
+    deviceId = "b4d5f851b68f4a98276e2ee839b1905122d5d0ad";
     try {
         await axios.put(
-            PLAY_URL,
-            { uris }, // Pass the array of track URIs
+            `${PLAY_URL}?device_id=${deviceId}`,
+            { uris }, // Array of track URIs to play
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -66,11 +96,35 @@ async function playTracks(uris) {
                 },
             }
         );
-        alert('Playing your last 5 tracks!');
-        console.log('Playing tracks:', uris);
+        console.log('Playing tracks on device:', deviceId);
+        alert('Tracks are now playing!');
     } catch (error) {
         console.error('Error playing tracks:', error);
-        alert('Ensure a Spotify device is active for playback.');
+        alert('Failed to play tracks. Ensure the device is active.');
+    }
+}
+
+async function getDeviceAndPlayTracks(uris) {
+    try {
+        const response = await axios.get(DEVICES_URL, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const devices = response.data.devices;
+
+        if (devices.length === 0) {
+            alert('No active Spotify devices found. Please activate a device.');
+            return;
+        }
+
+        // Find the Spotify Web Player device (or use the first available device)
+        const webPlayer = devices.find((device) => device.type === 'Computer');
+        const selectedDeviceId = webPlayer ? webPlayer.id : devices[0].id;
+
+        console.log('Using device:', selectedDeviceId);
+        playTracksOnDevice(uris, selectedDeviceId);
+    } catch (error) {
+        console.error('Error fetching devices or playing tracks:', error);
+        alert('Failed to get devices or play tracks.');
     }
 }
 
@@ -80,6 +134,10 @@ function initializeApp() {
         extractAccessToken();
     }
 }
+
+// Event Listeners
+document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
+document.getElementById('playTracksBtn').addEventListener('click', fetchAndPlayRecentlyPlayedTracks);
 
 // Call the initialize function when the page loads
 initializeApp();
