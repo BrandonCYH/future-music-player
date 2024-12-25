@@ -53,27 +53,6 @@ async function fetchAndPlayRecentlyPlayedTracks() {
     }
 }
 
-// Step 4: Play Tracks on Spotify
-async function playTracks(uris) {
-    try {
-        await axios.put(
-            PLAY_URL,
-            { uris }, // Pass the array of track URIs
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-        alert('Playing your last 5 tracks!');
-        console.log('Playing tracks:', uris);
-    } catch (error) {
-        console.error('Error playing tracks:', error);
-        alert('Ensure a Spotify device is active for playback.');
-    }
-}
-
 // Initialize App
 function initializeApp() {
     if (!accessToken) {
