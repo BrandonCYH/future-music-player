@@ -35,7 +35,8 @@ checkAvailableDevices();
 
 // Step 1: Handle OAuth Authentication
 function authenticateSpotify() {
-    const scope = 'user-read-recently-played user-modify-playback-state user-read-playback-state';
+  const scope = 'user-read-playback-state user-modify-playback-state';
+    // const scope = 'user-read-recently-played user-modify-playback-state user-read-playback-state';
     const authURL = `${AUTHORIZE_URL}?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(
         REDIRECT_URI
     )}&scope=${encodeURIComponent(scope)}`;
