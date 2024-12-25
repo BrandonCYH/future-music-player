@@ -31,23 +31,55 @@ function extractAccessToken() {
 }
 
 // Step 3: Fetch and Play Recently Played Tracks
-async function fetchAndPlayRecentlyPlayedTracks() {
+async function fetchRecentlyPlayedTracks() {
     try {
-        // Fetch Recently Played Tracks
-        const response = await axios.get(RECENTLY_PLAYED_URL, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-            params: { limit: 5 }, // Fetch only the latest 5 tracks
+        const response = await fetch(RECENTLY_PLAYED_URL, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            },
         });
 
-        const tracks = response.data.items;
-        const trackUris = tracks.map((item) => item.track.uri); // Extract track URIs
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
 
-        console.log('Recently Played Tracks URIs:', trackUris);
+        const data = await response.json();
+        console.log('Recently Played Tracks:', data);
+
+        // Get the URI of the first track (or adjust logic for your needs)
+        const firstTrackUri = data.items[0].track.uri;
+
+        // Play the first track
+        playTrack(firstTrackUri);
     } catch (error) {
         console.error('Error fetching recently played tracks:', error);
-        alert('Failed to fetch or play recently played tracks. Please try again.');
     }
 }
+
+async function playTrack(trackUri) {
+    try {
+        const response = await fetch(PLAY_URL, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ uris: [trackUri] }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Error playing track');
+        }
+
+        console.log('Playing track:', trackUri);
+    } catch (error) {
+        console.error('Error playing track:', error);
+    }
+}
+
+// Fetch and play recently played tracks
+fetchRecentlyPlayedTracks();
 
 // Initialize App
 function initializeApp() {
