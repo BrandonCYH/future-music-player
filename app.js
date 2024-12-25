@@ -58,45 +58,51 @@ function extractAccessToken() {
 
 // Step 3: Fetch and Play Recently Played Tracks
 async function fetchAndPlayRecentlyPlayedTracks() {
-    try {
-        // Fetch Recently Played Tracks
-        const response = await axios.get(RECENTLY_PLAYED_URL, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-            params: { limit: 5 }, // Fetch only the latest 5 tracks
-        });
+  try {
+    // Fetch Recently Played Tracks
+    const response = await axios.get(RECENTLY_PLAYED_URL, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      params: { limit: 5 }, // Fetch only the latest 5 tracks
+    });
 
-        const tracks = response.data.items;
-        const trackUris = tracks.map((item) => item.track.uri); // Extract track URIs
+    const tracks = response.data.items;
+    const trackUris = tracks.map((item) => item.track.uri); // Extract track URIs
 
-        console.log('Recently Played Tracks URIs:', trackUris);
+    console.log('Recently Played Tracks URIs:', trackUris);
 
-        // Play Tracks
-        await playTracks(trackUris);
-    } catch (error) {
-        console.error('Error fetching recently played tracks:', error);
-        alert('Failed to fetch or play recently played tracks. Please try again.');
-    }
+    // Play Tracks
+    await playTracks(trackUris);
+  } catch (error) {
+    console.error('Error fetching recently played tracks:', error);
+    alert('Failed to fetch or play recently played tracks. Please try again.');
+  }
 }
+
 
 // Step 4: Play Tracks on Spotify
 async function playTracks(uris) {
-    try {
-        await axios.put(
-            PLAY_URL,
-            { uris }, // Pass the array of track URIs
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-        alert('Playing your last 5 tracks!');
-        console.log('Playing tracks:', uris);
-    } catch (error) {
-        console.error('Error playing tracks:', error);
-        alert('Ensure a Spotify device is active for playback.');
-    }
+  try {
+    // Check for available devices
+    const deviceId = await checkAvailableDevices();
+    if (!deviceId) return;
+
+    // Play tracks on the specified device
+    await axios.put(
+      `${PLAY_URL}?device_id=${deviceId}`,
+      { uris }, // Pass the array of track URIs
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    alert('Playing your last 5 tracks!');
+    console.log('Playing tracks:', uris);
+  } catch (error) {
+    console.error('Error playing tracks:', error);
+    alert('Failed to play tracks. Please ensure a Spotify device is active.');
+  }
 }
 
 // Initialize App
