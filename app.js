@@ -3,7 +3,36 @@ const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_play
 const scopes = ['user-read-private', 'user-read-email', 'user-follow-read', 'playlist-read-private', 'playlist-read-collaborative']; // Add other scopes as needed
 let accessToken = null;
 
-// Fetch available devices
+// Authenticate with Spotify
+function authenticateSpotify() {
+    const scope = scopes.join(' ');
+    const authURL = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
+        redirectUri
+    )}&scope=${encodeURIComponent(scope)}`;
+
+    // Redirect to Spotify's authentication page
+    window.location.href = authURL;
+}
+
+// Extract Access Token from URL hash
+function extractAccessToken() {
+    if (!accessToken) {
+        const hash = window.location.hash;
+        if (hash) {
+            const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
+            accessToken = params.get('access_token');
+            // console.log('Access Token:', accessToken);
+
+            if (accessToken) {
+                // Remove the token from the URL for cleaner browsing
+                window.location.hash = '';
+            } else {
+                console.error('Access token not found. Please authenticate.');
+            }
+        }
+    }
+}
+
 async function fetchDevices() {
     if (!accessToken) {
         console.error('No access token available. Please authenticate.');
@@ -35,7 +64,7 @@ async function fetchDevices() {
 
         if (activeDevice) {
             // Play track if device is found
-            const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI from your playlist
+            const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI
             playTrack(activeDevice.id, trackUri);
         } else {
             console.error('No active devices found. Make sure Spotify is running on a device.');
@@ -46,7 +75,7 @@ async function fetchDevices() {
     }
 }
 
-// Play a track on the selected device
+// Step 4: Play track on the selected device
 async function playTrack(deviceId, trackUri) {
     const PLAY_URL = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
 
@@ -57,7 +86,7 @@ async function playTrack(deviceId, trackUri) {
                 Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ uris: [trackUri] }), // Passing the URI of the track
+            body: JSON.stringify({ uris: [trackUri] }),
         });
 
         if (!response.ok) {
@@ -69,36 +98,6 @@ async function playTrack(deviceId, trackUri) {
 
     } catch (error) {
         console.error('Error playing track:', error);
-    }
-}
-
-// Authenticate with Spotify
-function authenticateSpotify() {
-    const scope = scopes.join(' ');
-    const authURL = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
-        redirectUri
-    )}&scope=${encodeURIComponent(scope)}`;
-
-    // Redirect to Spotify's authentication page
-    window.location.href = authURL;
-}
-
-// Extract Access Token from URL hash
-function extractAccessToken() {
-    if (!accessToken) {
-        const hash = window.location.hash;
-        if (hash) {
-            const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
-            accessToken = params.get('access_token');
-            // console.log('Access Token:', accessToken);
-
-            if (accessToken) {
-                // Remove the token from the URL for cleaner browsing
-                window.location.hash = '';
-            } else {
-                console.error('Access token not found. Please authenticate.');
-            }
-        }
     }
 }
 
