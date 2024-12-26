@@ -108,11 +108,11 @@ function initializeApp() {
     }
 }
 
+// Call initializeApp when the page loads
+initializeApp();
+
 // Event Listeners
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
 document.getElementById('getProfileBtn').addEventListener('click', fetchUserProfile);
-// Add an event listener for the button to fetch followed artists
 document.getElementById('getArtistBtn').addEventListener('click', fetchFollowedArtists);
 
-// Call initializeApp when the page loads
-initializeApp();
