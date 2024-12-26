@@ -3,6 +3,43 @@ const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_play
 const scopes = ['user-read-private', 'user-read-email', 'user-follow-read', 'playlist-read-private', 'playlist-read-collaborative', 'user-read-playback-state', 'user-modify-playback-state', 'streaming']; // Add other scopes as needed
 let accessToken = null;
 
+window.onSpotifyWebPlaybackSDKReady = () => {
+    const token = 'BQBBKWzyNKgjowIjZxWFVzxulTqZO01nMDuL3lawn_o6AEEijCpebj7kKTWZC3X3Kw6bROHJR7_6xwWjtYO331LlAEUFRt11fAJc_x1PlJEzT0oCQuB1m9YVeysjBj2ASBAp8HdlDP-QEM2KISF9b3CeWTphjjtUcJtbJI9OLMWgCcw6WVlOTMdB8aC1E5qpwfmjNCxAi7NYFeLDgQsEaw5Ye55dGFGIZvIv';
+    const player = new Spotify.Player({
+        name: 'Web Playback SDK Quick Start Player',
+        getOAuthToken: cb => { cb(token); },
+        volume: 0.5
+    });
+
+    // Ready
+    player.addListener('ready', ({ device_id }) => {
+        console.log('Ready with Device ID', device_id);
+    });
+
+    // Not Ready
+    player.addListener('not_ready', ({ device_id }) => {
+        console.log('Device ID has gone offline', device_id);
+    });
+
+    player.addListener('initialization_error', ({ message }) => {
+        console.error(message);
+    });
+
+    player.addListener('authentication_error', ({ message }) => {
+        console.error(message);
+    });
+
+    player.addListener('account_error', ({ message }) => {
+        console.error(message);
+    });
+
+    document.getElementById('togglePlay').onclick = function () {
+        player.togglePlay();
+    };
+
+    player.connect();
+}
+
 // Authenticate with Spotify
 function authenticateSpotify() {
     const scope = scopes.join(' ');
@@ -153,8 +190,6 @@ async function fetchDevices() {
         const data = await response.json();
         const devices = data.devices;
 
-        console.log('Available Devices:', devices);
-
         if (devices.length === 0) {
             console.log('No devices found.');
             alert('No active devices found. Please start playing music on a device.');
@@ -163,7 +198,6 @@ async function fetchDevices() {
             const activeDevice = devices.find(device => device.is_active);
             if (activeDevice) {
                 console.log('Active Device:', activeDevice);
-                playTrack(activeDevice.id, "spotify:playlist:5NyycdxSfDCOHiN92UQvQd"); // Example track URI
             } else {
                 console.log('No active device available to play music.');
             }
@@ -171,32 +205,6 @@ async function fetchDevices() {
 
     } catch (error) {
         console.error('Error fetching devices:', error);
-    }
-}
-
-async function playTrack(deviceId, trackUri) {
-    const PLAY_URL = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
-
-    try {
-        const response = await fetch(PLAY_URL, {
-            method: 'PUT',
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                uris: [trackUri], // URI of the track you want to play
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        console.log('Track is playing...');
-    } catch (error) {
-        console.error('Error playing track:', error);
-        alert('Error playing the track. Make sure Spotify is open and a device is active.');
     }
 }
 
