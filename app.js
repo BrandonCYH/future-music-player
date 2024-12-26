@@ -66,6 +66,40 @@ async function fetchUserProfile() {
     }
 }
 
+async function fetchFollowedArtists() {
+    if (!accessToken) {
+        console.error('No access token available. Please authenticate.');
+        return;
+    }
+
+    const FOLLOWING_URL = 'https://api.spotify.com/v1/me/following?type=artist';
+
+    try {
+        const response = await fetch(FOLLOWING_URL, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const artists = data.artists.items;
+
+        console.log('Followed Artists:', artists);
+
+        // Display the artists' names
+        const artistNames = artists.map(artist => artist.name).join(', ');
+        alert(`Followed Artists: ${artistNames}`);
+    } catch (error) {
+        console.error('Error fetching followed artists:', error);
+    }
+}
+
 // Initialize App
 function initializeApp() {
     extractAccessToken();
@@ -77,6 +111,8 @@ function initializeApp() {
 // Event Listeners
 document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
 document.getElementById('getProfileBtn').addEventListener('click', fetchUserProfile);
+// Add an event listener for the button to fetch followed artists
+document.getElementById('getArtistBtn').addEventListener('click', fetchFollowedArtists);
 
 // Call initializeApp when the page loads
 initializeApp();
