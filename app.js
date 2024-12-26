@@ -22,7 +22,6 @@ function extractAccessToken() {
         if (hash) {
             const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
             accessToken = params.get('access_token');
-            // console.log('Access Token:', accessToken);
 
             if (accessToken) {
                 // Remove the token from the URL for cleaner browsing
@@ -34,7 +33,7 @@ function extractAccessToken() {
     }
 }
 
-async function fetchDevices(trackUri) {
+async function fetchDevices() {
     if (!accessToken) {
         console.error('No access token available. Please authenticate.');
         return;
@@ -62,7 +61,6 @@ async function fetchDevices(trackUri) {
 
         // Check if there is an active device (e.g., the Web Player or Desktop App)
         const activeDevice = devices.find(device => device.is_active);
-        console.log(activeDevice);
 
         if (activeDevice) {
             // Play track if device is found
@@ -131,7 +129,6 @@ async function fetchUserProfile() {
 
         // Example: Display the user's name
         alert(`Welcome, ${profileData.display_name}!`);
-        alert(`Email, ${profileData.email}!`);
     } catch (error) {
         console.error('Error fetching user profile:', error);
     }
@@ -195,6 +192,8 @@ async function fetchUserPlaylists() {
         const data = await response.json();
         const playlists = data.items;
         musicId = data.uri;
+
+        console.log(musicId);
 
         console.log('User Playlists:', playlists);
 
