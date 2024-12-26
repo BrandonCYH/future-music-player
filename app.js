@@ -21,7 +21,7 @@ function extractAccessToken() {
         if (hash) {
             const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
             accessToken = params.get('access_token');
-            console.log('Access Token:', accessToken);
+            // console.log('Access Token:', accessToken);
 
             if (accessToken) {
                 // Remove the token from the URL for cleaner browsing
@@ -60,6 +60,7 @@ async function fetchUserProfile() {
 
         // Example: Display the user's name
         alert(`Welcome, ${profileData.display_name}!`);
+        alert(`Email, ${profileData.email}!`);
     } catch (error) {
         console.error('Error fetching user profile:', error);
     }
