@@ -106,7 +106,7 @@ async function fetchUserPlaylists() {
         return;
     }
 
-    const PLAYLISTS_URL = 'https://api.spotify.com/v1/users/{user_id}/playlists';  // Fetch first 5 playlists
+    const PLAYLISTS_URL = 'https://api.spotify.com/v1/me/playlists?limit=5';  // Fetch first 5 playlists
 
     try {
         const response = await fetch(PLAYLISTS_URL, {
