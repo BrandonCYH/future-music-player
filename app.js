@@ -34,7 +34,6 @@ function extractAccessToken() {
 }
 
 async function fetchUserProfile(accessToken) {
-    extractAccessToken();
     const PROFILE_URL = 'https://api.spotify.com/v1/me';
 
     
@@ -63,7 +62,7 @@ async function fetchUserProfile(accessToken) {
 }
 
 document.getElementById("authenticateBtn").addEventListener("click", authenticateSpotify);
-document.getElementById("getProfileBtn").addEventListener("click", fetchUserProfile);
+document.getElementById("getProfileBtn").addEventListener("click", extractAccessToken);
 
 
 
