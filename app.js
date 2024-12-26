@@ -1,27 +1,65 @@
 const clientId = 'a76798888aba4544866c66b27a161138'; // Replace with your app's Client ID
+const clientSecret = '53d02a7e23cd442b9037dbe5d51f058f';
+const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_player'; // Replace with your app's Redirect URI
 const scopes = [
     'user-read-private',
     'user-read-email', // Add other scopes as needed
 ];
+let accessToken = null;
 
-function authenticateWithSpotify() {
-    const authUrl = `https://accounts.spotify.com/authorize?` +
-        `client_id=${clientId}&` +
-        `response_type=token&` + // Use 'code' for Authorization Code Flow
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `scope=${encodeURIComponent(scopes.join(' '))}`;
+function authenticateSpotify() {
+    const authURL = `${AUTHORIZE_URL}?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
+        redirectUri
+    )}&scope=${encodeURIComponent(scopes)}`;
 
-    // Redirect to the Spotify login page
-    window.location.href = authUrl;
+    window.location.href = authURL;
 }
 
-document.getElementById("authenticateBtn").addEventListener("click", authenticateWithSpotify);
+function extractAccessToken() {
+    const hash = window.location.hash;
+    if (hash) {
+        const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
+        const accessToken = params.get('access_token');
+        console.log('Access Token:', accessToken);
 
-const apiEndPoints = "https://api.spotify.com/v1/me";
+        if (accessToken) {
+            fetchUserProfile(accessToken); // Pass the token to fetch profile data
+        } else {
+            console.error('Access token not found. Please authenticate.');
+        }
+    }
+}
 
-fetch(apiEndPoints)
-    .then(response => response.json)
-    .then(data => {
-        console.log(data);
-    })
+async function fetchUserProfile(accessToken) {
+    const PROFILE_URL = 'https://api.spotify.com/v1/me';
+
+    try {
+        const response = await fetch(PROFILE_URL, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const profileData = await response.json();
+        console.log('User Profile Data:', profileData);
+
+        // Example: Display the user's name
+        alert(`Welcome, ${profileData.display_name}!`);
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+    }
+}
+
+fetchUserProfile();
+
+document.getElementById("authenticateBtn").addEventListener("click", authenticateSpotify);
+
+
+
