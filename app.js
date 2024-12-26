@@ -125,30 +125,6 @@ async function fetchUserPlaylists() {
         const playlists = data.items;
 
         console.log('User Playlists:', playlists);
-
-        // Example: Display the playlist names
-        const playlistNames = playlists.map(playlist => playlist.name).join(', ');
-        alert(`Your Playlists: ${playlistNames}`);
-
-        // Ensure the playlistContainer exists before modifying it
-        const playlistContainer = document.getElementById('playlistContainer');
-        if (playlistContainer) {
-            playlistContainer.innerHTML = '';  // Clear any existing content
-
-            playlists.forEach(playlist => {
-                const playlistDiv = document.createElement('div');
-                const img = document.createElement('img');
-                img.src = playlist.images[0]?.url || '';  // Use the first image, or fallback if no image exists
-                img.alt = playlist.name;
-                img.style.width = '100px';
-                img.style.margin = '10px';
-                playlistDiv.appendChild(img);
-                playlistDiv.appendChild(document.createTextNode(playlist.name));
-                playlistContainer.appendChild(playlistDiv);
-            });
-        } else {
-            console.error('Playlist container not found in DOM.');
-        }
     } catch (error) {
         console.error('Error fetching user playlists:', error);
     }
