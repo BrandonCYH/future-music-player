@@ -61,44 +61,10 @@ async function fetchDevices() {
 
         // Check if there is an active device (e.g., the Web Player or Desktop App)
         const activeDevice = devices.find(device => device.is_active);
-
-        if (activeDevice) {
-            // Play track if device is found
-            playTrack(activeDevice.id, musicId);
-        } else {
-            console.error('No active devices found. Make sure Spotify is running on a device.');
-        }
+        console.log(activeDevice);
 
     } catch (error) {
         console.error('Error fetching devices:', error);
-    }
-}
-
-fetchDevices();
-
-// Step 4: Play track on the selected device
-async function playTrack(deviceId, trackUri) {
-    const PLAY_URL = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
-
-    try {
-        const response = await fetch(PLAY_URL, {
-            method: 'PUT',
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ uris: [trackUri] }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        console.log('Track is playing:', trackUri);
-        alert('Track is now playing!');
-
-    } catch (error) {
-        console.error('Error playing track:', error);
     }
 }
 
