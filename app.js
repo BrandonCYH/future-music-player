@@ -215,4 +215,9 @@ document.getElementById('authenticateBtn').addEventListener('click', authenticat
 document.getElementById('getProfileBtn').addEventListener('click', fetchUserProfile);
 document.getElementById('getArtistBtn').addEventListener('click', fetchFollowedArtists);
 document.getElementById('fetchPlaylistsBtn').addEventListener('click', fetchUserPlaylists);
+document.getElementById('playBtn').addEventListener('click', () => {
+    const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI from your playlist
+    fetchDevices(trackUri);
+});
+
 
