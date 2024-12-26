@@ -2,7 +2,6 @@ const clientId = 'a76798888aba4544866c66b27a161138'; // Replace with your app's 
 const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_player'; // Replace with your app's Redirect URI
 const scopes = ['user-read-private', 'user-read-email', 'user-follow-read', 'playlist-read-private', 'playlist-read-collaborative', 'user-read-playback-state', 'user-modify-playback-state', 'streaming']; // Add other scopes as needed
 let accessToken = null;
-let musicId = null;
 
 // Authenticate with Spotify
 function authenticateSpotify() {
@@ -59,9 +58,19 @@ async function fetchDevices() {
 
         console.log('Available Devices:', devices);
 
-        // Check if there is an active device (e.g., the Web Player or Desktop App)
-        const activeDevice = devices.find(device => device.is_active);
-        console.log(activeDevice);
+        if (devices.length === 0) {
+            console.log('No devices found.');
+            alert('No active devices found. Please start playing music on a device.');
+        } else {
+            console.log('Available Devices:', devices);
+            const activeDevice = devices.find(device => device.is_active);
+            if (activeDevice) {
+                console.log('Active Device:', activeDevice);
+                playTrack(activeDevice.id, "spotify:playlist:5NyycdxSfDCOHiN92UQvQd"); // Example track URI
+            } else {
+                console.log('No active device available to play music.');
+            }
+        }
 
     } catch (error) {
         console.error('Error fetching devices:', error);
@@ -157,14 +166,37 @@ async function fetchUserPlaylists() {
 
         const data = await response.json();
         const playlists = data.items;
-        musicId = data.uri;
-
-        console.log(musicId);
 
         console.log('User Playlists:', playlists);
 
     } catch (error) {
         console.error('Error fetching user playlists:', error);
+    }
+}
+
+async function playTrack(deviceId, trackUri) {
+    const PLAY_URL = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
+
+    try {
+        const response = await fetch(PLAY_URL, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                uris: [trackUri], // URI of the track you want to play
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        console.log('Track is playing...');
+    } catch (error) {
+        console.error('Error playing track:', error);
+        alert('Error playing the track. Make sure Spotify is open and a device is active.');
     }
 }
 
