@@ -2,6 +2,7 @@ const clientId = 'a76798888aba4544866c66b27a161138'; // Replace with your app's 
 const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_player'; // Replace with your app's Redirect URI
 const scopes = ['user-read-private', 'user-read-email', 'user-follow-read', 'playlist-read-private', 'playlist-read-collaborative', 'user-read-playback-state', 'user-modify-playback-state', 'streaming']; // Add other scopes as needed
 let accessToken = null;
+let musicId = null;
 
 // Authenticate with Spotify
 function authenticateSpotify() {
@@ -61,10 +62,11 @@ async function fetchDevices(trackUri) {
 
         // Check if there is an active device (e.g., the Web Player or Desktop App)
         const activeDevice = devices.find(device => device.is_active);
+        console.log(activeDevice);
 
         if (activeDevice) {
             // Play track if device is found
-            playTrack(activeDevice.id, trackUri);
+            playTrack(activeDevice.id, musicId);
         } else {
             console.error('No active devices found. Make sure Spotify is running on a device.');
         }
@@ -192,8 +194,10 @@ async function fetchUserPlaylists() {
 
         const data = await response.json();
         const playlists = data.items;
+        musicId = data.uri;
 
         console.log('User Playlists:', playlists);
+
     } catch (error) {
         console.error('Error fetching user playlists:', error);
     }
@@ -215,9 +219,6 @@ document.getElementById('authenticateBtn').addEventListener('click', authenticat
 document.getElementById('getProfileBtn').addEventListener('click', fetchUserProfile);
 document.getElementById('getArtistBtn').addEventListener('click', fetchFollowedArtists);
 document.getElementById('fetchPlaylistsBtn').addEventListener('click', fetchUserPlaylists);
-document.getElementById('playBtn').addEventListener('click', () => {
-    const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI from your playlist
-    fetchDevices(trackUri);
-});
+document.getElementById('playBtn').addEventListener('click', fetchDevices);
 
 
