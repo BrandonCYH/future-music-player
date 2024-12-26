@@ -72,7 +72,7 @@ async function fetchFollowedArtists() {
         return;
     }
 
-    const FOLLOWING_URL = 'https://api.spotify.com/v1/me/following?type=artist';
+    const FOLLOWING_URL = 'https://api.spotify.com/v1/me/following';
 
     try {
         const response = await fetch(FOLLOWING_URL, {
@@ -91,6 +91,18 @@ async function fetchFollowedArtists() {
         const artists = data.artists.items;
 
         console.log('Followed Artists:', artists);
+
+        // Example: Display artist images in HTML
+        const artistContainer = document.getElementById('albumArt');
+        artistContainer.innerHTML = '';
+        artists.forEach(artist => {
+            const img = document.createElement('img');
+            img.src = artist.images[0]?.url || ''; // Use the first image, or fallback if no image exists
+            img.alt = artist.name;
+            img.style.width = '100px';
+            img.style.margin = '10px';
+            artistContainer.appendChild(img);
+        });
 
         // Display the artists' names
         const artistNames = artists.map(artist => artist.name).join(', ');
