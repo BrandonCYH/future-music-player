@@ -59,7 +59,8 @@ async function fetchUserProfile() {
         console.log('User Profile Data:', profileData);
 
         // Example: Display the user's name
-        alert(`Welcome, ${profileData.email}!`);
+        alert(`Welcome, ${profileData.display_name}!`);
+        alert(`Email, ${profileData.email}!`);
     } catch (error) {
         console.error('Error fetching user profile:', error);
     }
