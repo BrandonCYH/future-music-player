@@ -38,7 +38,7 @@ extractAccessToken();
 async function fetchUserProfile(accessToken) {
     const PROFILE_URL = 'https://api.spotify.com/v1/me';
 
-    console.log(accessToken);
+    
     try {
         const response = await fetch(PROFILE_URL, {
             method: 'GET',
@@ -59,6 +59,7 @@ async function fetchUserProfile(accessToken) {
         alert(`Welcome, ${profileData.display_name}!`);
     } catch (error) {
         console.error('Error fetching user profile:', error);
+        console.log(accessToken);
     }
 }
 
