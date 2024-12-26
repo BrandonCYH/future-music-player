@@ -72,7 +72,7 @@ async function fetchFollowedArtists() {
         return;
     }
 
-    const FOLLOWING_URL = 'https://api.spotify.com/v1/me/following';
+    const FOLLOWING_URL = 'https://api.spotify.com/v1/me/following?type=artist';
 
     try {
         const response = await fetch(FOLLOWING_URL, {
