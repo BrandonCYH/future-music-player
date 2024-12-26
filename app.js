@@ -1,6 +1,6 @@
 const clientId = 'a76798888aba4544866c66b27a161138'; // Replace with your app's Client ID
 const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_player'; // Replace with your app's Redirect URI
-const scopes = ['user-read-private', 'user-read-email']; // Add other scopes as needed
+const scopes = ['user-read-private', 'user-read-email', 'user-follow-read']; // Add other scopes as needed
 let accessToken = null;
 
 // Authenticate with Spotify
