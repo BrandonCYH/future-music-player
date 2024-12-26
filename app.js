@@ -9,10 +9,12 @@ const scopes = [
 let accessToken = null;
 
 function authenticateSpotify() {
-    const authURL = `${AUTHORIZE_URL}?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
+    const scope = 'user-read-private'; // Permissions for user profile data
+    const authURL = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
         redirectUri
-    )}&scope=${encodeURIComponent(scopes)}`;
+    )}&scope=${encodeURIComponent(scope)}`;
 
+    // Redirect to Spotify's authentication page
     window.location.href = authURL;
 }
 
@@ -57,9 +59,8 @@ async function fetchUserProfile(accessToken) {
     }
 }
 
-fetchUserProfile();
-
 document.getElementById("authenticateBtn").addEventListener("click", authenticateSpotify);
+document.getElementById("getProfileBtn").addEventListener("click", fetchUserProfile);
 
 
 
