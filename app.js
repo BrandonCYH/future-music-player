@@ -64,7 +64,6 @@ async function fetchDevices(trackUri) {
 
         if (activeDevice) {
             // Play track if device is found
-            // const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI
             playTrack(activeDevice.id, trackUri);
         } else {
             console.error('No active devices found. Make sure Spotify is running on a device.');
@@ -74,6 +73,8 @@ async function fetchDevices(trackUri) {
         console.error('Error fetching devices:', error);
     }
 }
+
+fetchDevices();
 
 // Step 4: Play track on the selected device
 async function playTrack(deviceId, trackUri) {
