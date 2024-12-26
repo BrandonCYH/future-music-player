@@ -33,9 +33,8 @@ function extractAccessToken() {
     }
 }
 
-extractAccessToken();
-
 async function fetchUserProfile(accessToken) {
+    extractAccessToken();
     const PROFILE_URL = 'https://api.spotify.com/v1/me';
 
     
