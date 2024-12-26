@@ -3,6 +3,75 @@ const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_play
 const scopes = ['user-read-private', 'user-read-email', 'user-follow-read', 'playlist-read-private', 'playlist-read-collaborative']; // Add other scopes as needed
 let accessToken = null;
 
+// Fetch available devices
+async function fetchDevices() {
+    if (!accessToken) {
+        console.error('No access token available. Please authenticate.');
+        return;
+    }
+
+    const DEVICES_URL = 'https://api.spotify.com/v1/me/player/devices';
+
+    try {
+        const response = await fetch(DEVICES_URL, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const devices = data.devices;
+
+        console.log('Available Devices:', devices);
+
+        // Check if there is an active device (e.g., the Web Player or Desktop App)
+        const activeDevice = devices.find(device => device.is_active);
+
+        if (activeDevice) {
+            // Play track if device is found
+            const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI from your playlist
+            playTrack(activeDevice.id, trackUri);
+        } else {
+            console.error('No active devices found. Make sure Spotify is running on a device.');
+        }
+
+    } catch (error) {
+        console.error('Error fetching devices:', error);
+    }
+}
+
+// Play a track on the selected device
+async function playTrack(deviceId, trackUri) {
+    const PLAY_URL = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
+
+    try {
+        const response = await fetch(PLAY_URL, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ uris: [trackUri] }), // Passing the URI of the track
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        console.log('Track is playing:', trackUri);
+        alert('Track is now playing!');
+
+    } catch (error) {
+        console.error('Error playing track:', error);
+    }
+}
+
 // Authenticate with Spotify
 function authenticateSpotify() {
     const scope = scopes.join(' ');
