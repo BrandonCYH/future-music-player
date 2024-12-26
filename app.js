@@ -1,15 +1,11 @@
 const clientId = 'a76798888aba4544866c66b27a161138'; // Replace with your app's Client ID
-const clientSecret = '53d02a7e23cd442b9037dbe5d51f058f';
-const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
 const redirectUri = 'https://brandoncyh.github.io/future-music-player/music_player'; // Replace with your app's Redirect URI
-const scopes = [
-    'user-read-private',
-    'user-read-email', // Add other scopes as needed
-];
+const scopes = ['user-read-private', 'user-read-email']; // Add other scopes as needed
 let accessToken = null;
 
+// Authenticate with Spotify
 function authenticateSpotify() {
-    const scope = 'user-read-private'; // Permissions for user profile data
+    const scope = scopes.join(' ');
     const authURL = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
         redirectUri
     )}&scope=${encodeURIComponent(scope)}`;
@@ -18,22 +14,32 @@ function authenticateSpotify() {
     window.location.href = authURL;
 }
 
+// Extract Access Token from URL hash
 function extractAccessToken() {
-    const hash = window.location.hash;
-    if (hash) {
-        const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
-        const accessToken = params.get('access_token');
-        console.log('Access Token:', accessToken);
+    if (!accessToken) {
+        const hash = window.location.hash;
+        if (hash) {
+            const params = new URLSearchParams(hash.substring(1)); // Remove the `#` prefix
+            accessToken = params.get('access_token');
+            console.log('Access Token:', accessToken);
 
-        if (accessToken) {
-            fetchUserProfile(accessToken); // Pass the token to fetch profile data
-        } else {
-            console.error('Access token not found. Please authenticate.');
+            if (accessToken) {
+                // Remove the token from the URL for cleaner browsing
+                window.location.hash = '';
+            } else {
+                console.error('Access token not found. Please authenticate.');
+            }
         }
     }
 }
 
-async function fetchUserProfile(accessToken) {
+// Fetch User Profile Data
+async function fetchUserProfile() {
+    if (!accessToken) {
+        console.error('No access token available. Please authenticate.');
+        return;
+    }
+
     const PROFILE_URL = 'https://api.spotify.com/v1/me';
 
     try {
@@ -59,8 +65,17 @@ async function fetchUserProfile(accessToken) {
     }
 }
 
-document.getElementById("authenticateBtn").addEventListener("click", authenticateSpotify);
-document.getElementById("getProfileBtn").addEventListener("click", fetchUserProfile);
+// Initialize App
+function initializeApp() {
+    extractAccessToken();
+    if (accessToken) {
+        console.log('Access token already extracted.');
+    }
+}
 
+// Event Listeners
+document.getElementById('authenticateBtn').addEventListener('click', authenticateSpotify);
+document.getElementById('getProfileBtn').addEventListener('click', fetchUserProfile);
 
-
+// Call initializeApp when the page loads
+initializeApp();
