@@ -62,7 +62,7 @@ async function fetchUserProfile(accessToken) {
 }
 
 document.getElementById("authenticateBtn").addEventListener("click", authenticateSpotify);
-document.getElementById("getProfileBtn").addEventListener("click", extractAccessToken);
+document.getElementById("getProfileBtn").addEventListener("click", fetchUserProfile);
 
 
 
