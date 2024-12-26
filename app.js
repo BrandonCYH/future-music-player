@@ -33,7 +33,7 @@ function extractAccessToken() {
     }
 }
 
-async function fetchDevices() {
+async function fetchDevices(trackUri) {
     if (!accessToken) {
         console.error('No access token available. Please authenticate.');
         return;
@@ -64,7 +64,7 @@ async function fetchDevices() {
 
         if (activeDevice) {
             // Play track if device is found
-            const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI
+            // const trackUri = 'spotify:track:3n3Ppam7vgaVa1iaRUc9Lp'; // Example track URI
             playTrack(activeDevice.id, trackUri);
         } else {
             console.error('No active devices found. Make sure Spotify is running on a device.');
