@@ -92,22 +92,6 @@ async function fetchFollowedArtists() {
 
         console.log('Followed Artists:', artists);
 
-        // Get the container where you want to display artist images
-        const container = document.getElementById('albumArt');
-        container.innerHTML = ''; // Clear existing content
-
-        // Loop through each artist and add their image to the container
-        artists.forEach((artist) => {
-            const img = document.createElement('img');
-            img.src = artist.images[0]?.url || 'placeholder.jpg'; // Use a placeholder if no image is available
-            img.alt = artist.name;
-            img.style.width = '150px'; // Set a desired width for the images
-            img.style.margin = '10px';
-
-            // Add the image to the container
-            container.appendChild(img);
-        });
-
         // Display the artists' names
         const artistNames = artists.map(artist => artist.name).join(', ');
         alert(`Followed Artists: ${artistNames}`);
